@@ -36,10 +36,10 @@ main() {
         mvn -B test -Phadoop2
         ;;
       dist)
-        mvn -P dist package -DskipTests javadoc:aggregate
+        mvn -Dcheckstyle.skip -s /Users/vsaboulin/Documents/github/kafka-docker-playground/scripts/settings.xml -P dist package -DskipTests javadoc:aggregate
         ;;
       clean)
-        mvn clean
+        mvn -s /Users/vsaboulin/Documents/github/kafka-docker-playground/scripts/settings.xml clean
         ;;
       *)
         usage

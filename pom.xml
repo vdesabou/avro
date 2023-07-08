@@ -111,11 +111,11 @@
   <build>
     <pluginManagement>
       <plugins>
-        <plugin>
+        <!-- <plugin>
           <groupId>com.diffplug.spotless</groupId>
           <artifactId>spotless-maven-plugin</artifactId>
           <version>${spotless-maven-plugin.version}</version>
-        </plugin>
+        </plugin> -->
         <plugin>
           <groupId>org.apache.maven.plugins</groupId>
           <artifactId>maven-antrun-plugin</artifactId>
