@@ -42,6 +42,7 @@ import org.apache.avro.generic.GenericRecord;
 import com.github.javafaker.Faker;
 import java.time.Instant;
 import java.util.concurrent.TimeUnit;
+import java.time.LocalDate;
 
 /** Generates schema data as Java objects with random values. */
 public class RandomData implements Iterable<Object> {
@@ -166,11 +167,29 @@ public class RandomData implements Iterable<Object> {
 
       long randomTimestamp = faker.number().numberBetween(fiveDaysAgo, currentTimestamp);
 
-      return (int)randomTimestamp;
+      return (int)(randomTimestamp*1000);
     }
-    // LogicalTypes.Date LocalDate.MAX.toEpochDay() > Integer.MAX;
-    // int randomValue = random.nextInt();
-    // return randomValue > 0 ? randomValue : -randomValue;
+    if (type instanceof LogicalTypes.TimeMicros || type instanceof LogicalTypes.TimestampMicros) {
+      long currentTimestamp = Instant.now().getEpochSecond();
+      long fiveDaysAgo = currentTimestamp - TimeUnit.DAYS.toSeconds(5);
+
+      long randomTimestamp = faker.number().numberBetween(fiveDaysAgo, currentTimestamp);
+
+      return (int)(randomTimestamp*1000000);
+    }
+
+    if (type instanceof LogicalTypes.Date) {
+      // Create a LocalDate object for January 1, 1970
+      LocalDate epoch = LocalDate.of(1970, 1, 1);
+
+      // Get the current date
+      LocalDate today = LocalDate.now();
+
+      // Calculate the number of days between the epoch and today
+      long daysSinceEpoch = java.time.temporal.ChronoUnit.DAYS.between(epoch, today);
+
+      return (int)(daysSinceEpoch);
+    }
     intCounter++;
     return intCounter;
   }
@@ -182,28 +201,22 @@ public class RandomData implements Iterable<Object> {
 
       long randomTimestamp = faker.number().numberBetween(fiveDaysAgo, currentTimestamp);
 
-      return randomTimestamp;
+      return (randomTimestamp * 1000L);
     }
-    if (type instanceof LogicalTypes.TimeMicros) {
-      long randomValue = ThreadLocalRandom.current().nextLong(RandomData.MILLIS_IN_DAY * 1000L);
-      return Math.abs(randomValue);
+    if (type instanceof LogicalTypes.TimeMicros || type instanceof LogicalTypes.TimestampMicros) {
+      long currentTimestamp = Instant.now().getEpochSecond();
+      long fiveDaysAgo = currentTimestamp - TimeUnit.DAYS.toSeconds(5);
+
+      long randomTimestamp = faker.number().numberBetween(fiveDaysAgo, currentTimestamp);
+
+      return (randomTimestamp * 1000000L);
     }
-    // For LogicalTypes.TimestampMillis, every long would be OK,
-    // Instant.MAX.toEpochMilli() failed and would be > Long.MAX_VALUE.
-    // long randomValue = random.nextLong();
-    // return randomValue > 0 ? randomValue : -randomValue;
     longCounter++;
     return longCounter;
   }
 
   private Object randomString(Random random, int maxLength) {
     return faker.name().firstName();
-    // int length = random.nextInt(maxLength);
-    // byte[] bytes = new byte[length];
-    // for (int i = 0; i < length; i++) {
-    //   bytes[i] = (byte) ('a' + random.nextInt('z' - 'a'));
-    // }
-    // return utf8ForString ? new Utf8(bytes) : new String(bytes, UTF8);
   }
 
   private static ByteBuffer randomBytes(Random rand, int maxLength) {

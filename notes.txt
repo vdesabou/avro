@@ -1,0 +1,3 @@
+cd lang/java
+
+./build.sh dist
