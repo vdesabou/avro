@@ -18,6 +18,8 @@
 package org.apache.avro.util;
 
 import java.io.File;
+import java.math.BigDecimal;
+import java.math.BigInteger;
 import java.nio.Buffer;
 import java.nio.ByteBuffer;
 import java.nio.charset.Charset;
@@ -27,6 +29,7 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Random;
 import java.util.concurrent.ThreadLocalRandom;
 
@@ -140,7 +143,7 @@ public class RandomData implements Iterable<Object> {
     case STRING:
       return randomString(random, 40);
     case BYTES:
-      return randomBytes(random, 40);
+      return randomBytes(random, 40, schema.getLogicalType());
     case INT:
       return this.randomInt(random, schema.getLogicalType());
     case LONG:
@@ -219,11 +222,51 @@ public class RandomData implements Iterable<Object> {
     return faker.name().firstName();
   }
 
-  private static ByteBuffer randomBytes(Random rand, int maxLength) {
-    ByteBuffer bytes = ByteBuffer.allocate(rand.nextInt(maxLength));
-    ((Buffer) bytes).limit(bytes.capacity());
-    rand.nextBytes(bytes.array());
-    return bytes;
+  private ByteBuffer randomBytes(Random rand, int maxLength, LogicalType type) {
+    if (type instanceof LogicalTypes.Decimal) {
+      byte[] bytes;
+      bytes = generateDecimal((LogicalTypes.Decimal) type, rand);
+      ByteBuffer buffer = ByteBuffer.wrap(bytes);
+      return buffer;
+    } else {
+      ByteBuffer bytes = ByteBuffer.allocate(rand.nextInt(maxLength));
+      ((Buffer) bytes).limit(bytes.capacity());
+      rand.nextBytes(bytes.array());
+      return bytes;
+    }
+  }
+
+  private byte[] generateDecimal(LogicalTypes.Decimal decimalLogicalType, Random random) {
+      /*
+        According to the Avro 1.9.1 spec (http://avro.apache.org/docs/1.9.1/spec.html#Decimal):
+
+        "The decimal logical type represents an arbitrary-precision signed decimal number of the form
+      unscaled × 10-scale.
+
+        "A decimal logical type annotates Avro bytes or fixed types. The byte array must contain the
+      two's-complement representation of the unscaled integer value in big-endian byte order. The scale
+      is fixed, and is specified using an attribute."
+
+        We generate a random decimal here by starting with a value of zero, then repeatedly multiplying
+      by 10^15 (15 is the minimum number of significant digits in a double), and adding a new random
+      value in the range [0, 10^15) generated using the Random object for this generator. This is done
+      until the precision of the current value is equal to or greater than the precision of the logical
+      type. At this point, any extra digits (of there should be at most 14) are rounded off from the
+      value, a sign is randomly selected, it is converted to big-endian two's-complement representation,
+      and returned.
+        */
+    BigInteger bigInteger = BigInteger.ZERO;
+    final long maxIncrementExclusive = 1_000_000_000_000_000L;
+    int precision;
+    for (precision = 0; precision < decimalLogicalType.getPrecision(); precision += 15) {
+      bigInteger = bigInteger.multiply(BigInteger.valueOf(maxIncrementExclusive));
+      long increment = (long) (random.nextDouble() * maxIncrementExclusive);
+      bigInteger = bigInteger.add(BigInteger.valueOf(increment));
+    }
+    bigInteger = bigInteger.divide(
+        BigInteger.TEN.pow(precision - decimalLogicalType.getPrecision())
+    );
+    return bigInteger.toByteArray();
   }
 
   public static void main(String[] args) throws Exception {
