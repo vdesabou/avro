@@ -164,13 +164,9 @@ public class RandomData implements Iterable<Object> {
   private static final Charset UTF8 = StandardCharsets.UTF_8;
 
   private int randomInt(Random random, LogicalType type) {
-    if (type instanceof LogicalTypes.TimeMillis || type instanceof LogicalTypes.TimestampMillis) {
-      long currentTimestamp = Instant.now().getEpochSecond();
-      long fiveDaysAgo = currentTimestamp - TimeUnit.DAYS.toSeconds(5);
-
-      long randomTimestamp = faker.number().numberBetween(fiveDaysAgo, currentTimestamp);
-
-      return (int)(randomTimestamp*1000);
+    if (type instanceof LogicalTypes.TimeMillis) {
+      final long MILLIS_IN_DAY = 24 * 60 * 60 * 1000; // Total millis in a day.
+      return (int)ThreadLocalRandom.current().nextLong(0, MILLIS_IN_DAY);
     }
     if (type instanceof LogicalTypes.TimeMicros || type instanceof LogicalTypes.TimestampMicros) {
       long currentTimestamp = Instant.now().getEpochSecond();
