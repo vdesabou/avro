@@ -54,6 +54,7 @@ public class CreateRandomFileTool implements Tool {
     OptionSpec<String> file = p.accepts("schema-file", "Schema File").withOptionalArg().ofType(String.class);
     OptionSpec<String> inschema = p.accepts("schema", "Schema").withOptionalArg().ofType(String.class);
     OptionSpec<Long> seedOpt = p.accepts("seed", "Seed for random").withOptionalArg().ofType(Long.class);
+    OptionSpec<Boolean> noNullOpt = p.accepts("no-null", "no null").withOptionalArg().ofType(Boolean.class);
 
     OptionSet opts = p.parse(args.toArray(new String[0]));
     if (opts.nonOptionArguments().size() != 1) {
@@ -66,6 +67,7 @@ public class CreateRandomFileTool implements Tool {
     String schemastr = inschema.value(opts);
     String schemafile = file.value(opts);
     Long seed = seedOpt.value(opts);
+    Boolean noNull = noNullOpt.value(opts);
     if (schemastr == null && schemafile == null) {
       err.println("Need input schema (--schema-file) or (--schema)");
       p.printHelpOn(err);
@@ -85,7 +87,7 @@ public class CreateRandomFileTool implements Tool {
       return 1;
     }
 
-    RandomData rd = seed == null ? new RandomData(schema, countValue) : new RandomData(schema, countValue, seed);
+    RandomData rd = seed == null ? new RandomData(schema, countValue, noNull) : new RandomData(schema, countValue, seed, noNull);
     for (Object datum : rd)
       writer.append(datum);
 

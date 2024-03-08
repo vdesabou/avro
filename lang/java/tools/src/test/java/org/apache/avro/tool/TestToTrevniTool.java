@@ -54,7 +54,7 @@ public class TestToTrevniTool {
 
     DataFileWriter<Object> writer = new DataFileWriter<>(new GenericDatumWriter<>());
     writer.create(schema, Util.createFromFS(AVRO_FILE.toString()));
-    for (Object datum : new RandomData(schema, COUNT, SEED))
+    for (Object datum : new RandomData(schema, COUNT, SEED, false))
       writer.append(datum);
     writer.close();
 
@@ -62,7 +62,7 @@ public class TestToTrevniTool {
 
     AvroColumnReader<Object> reader = new AvroColumnReader<>(new AvroColumnReader.Params(TREVNI_FILE));
     Iterator<Object> found = reader.iterator();
-    for (Object expected : new RandomData(schema, COUNT, SEED))
+    for (Object expected : new RandomData(schema, COUNT, SEED, false))
       assertEquals(expected, found.next());
     reader.close();
   }

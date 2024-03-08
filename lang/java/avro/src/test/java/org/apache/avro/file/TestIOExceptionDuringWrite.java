@@ -61,7 +61,7 @@ public class TestIOExceptionDuringWrite {
     try (DataFileWriter<Object> writer = new DataFileWriter<>(new GenericDatumWriter<>())) {
       writer.create(SCHEMA, new FailingOutputStream(100000));
       int recordCnt = 0;
-      for (Object datum : new RandomData(SCHEMA, 100000, 42)) {
+      for (Object datum : new RandomData(SCHEMA, 100000, 42, false)) {
         writer.append(datum);
         if (++recordCnt % 17 == 0) {
           writer.flush();

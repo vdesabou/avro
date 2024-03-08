@@ -112,7 +112,7 @@ public class TestDataFile {
     writer.create(SCHEMA, makeFile(codec));
     try {
       int count = 0;
-      for (Object datum : new RandomData(SCHEMA, COUNT, SEED)) {
+      for (Object datum : new RandomData(SCHEMA, COUNT, SEED, false)) {
         writer.append(datum);
         if (++count % (COUNT / 3) == 0)
           writer.sync(); // force some syncs mid-file
@@ -151,7 +151,7 @@ public class TestDataFile {
     try (DataFileReader<Object> reader = new DataFileReader<>(makeFile(codec), new GenericDatumReader<>())) {
       Object datum = null;
       if (VALIDATE) {
-        for (Object expected : new RandomData(SCHEMA, COUNT, SEED)) {
+        for (Object expected : new RandomData(SCHEMA, COUNT, SEED, false)) {
           datum = reader.next(datum);
           assertEquals(expected, datum);
         }
@@ -214,7 +214,7 @@ public class TestDataFile {
     File file = makeFile(codec);
     long start = file.length();
     try (DataFileWriter<Object> writer = new DataFileWriter<>(new GenericDatumWriter<>()).appendTo(file)) {
-      for (Object datum : new RandomData(SCHEMA, COUNT, SEED + 1)) {
+      for (Object datum : new RandomData(SCHEMA, COUNT, SEED + 1, false)) {
         writer.append(datum);
       }
     }
@@ -222,7 +222,7 @@ public class TestDataFile {
       reader.seek(start);
       Object datum = null;
       if (VALIDATE) {
-        for (Object expected : new RandomData(SCHEMA, COUNT, SEED + 1)) {
+        for (Object expected : new RandomData(SCHEMA, COUNT, SEED + 1, false)) {
           datum = reader.next(datum);
           assertEquals(expected, datum);
         }
@@ -285,7 +285,7 @@ public class TestDataFile {
     int currentCount = 0;
     int flushCounter = 0;
     try {
-      for (Object datum : new RandomData(SCHEMA, COUNT, SEED + 1)) {
+      for (Object datum : new RandomData(SCHEMA, COUNT, SEED + 1, false)) {
         currentCount++;
         writer.append(datum);
         writer.sync();
@@ -320,7 +320,7 @@ public class TestDataFile {
       }
       int currentCount = 0;
       int syncCounter = 0;
-      for (Object datum : new RandomData(SCHEMA, COUNT, SEED + 1)) {
+      for (Object datum : new RandomData(SCHEMA, COUNT, SEED + 1, false)) {
         currentCount++;
         writer.append(datum);
         if (currentCount % 10 == 0) {

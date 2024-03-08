@@ -55,7 +55,7 @@ public class TrevniCreateRandomTool implements Tool {
 
     AvroColumnWriter<Object> writer = new AvroColumnWriter<>(schema, new ColumnFileMetaData());
 
-    for (Object datum : new RandomData(schema, count))
+    for (Object datum : new RandomData(schema, count, false))
       writer.write(datum);
 
     writer.writeTo(outputFile);

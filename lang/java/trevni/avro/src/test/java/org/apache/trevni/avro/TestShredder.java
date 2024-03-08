@@ -201,7 +201,7 @@ public class TestShredder {
   private void checkWrite(Schema schema) throws IOException {
     AvroColumnWriter<Object> writer = new AvroColumnWriter<>(schema, new ColumnFileMetaData());
     int count = 0;
-    for (Object datum : new RandomData(schema, COUNT, SEED)) {
+    for (Object datum : new RandomData(schema, COUNT, SEED, false)) {
       // System.out.println("datum="+datum);
       writer.write(datum);
     }
@@ -210,7 +210,7 @@ public class TestShredder {
 
   private void checkRead(Schema schema) throws IOException {
     AvroColumnReader<Object> reader = new AvroColumnReader<>(new AvroColumnReader.Params(FILE).setSchema(schema));
-    for (Object expected : new RandomData(schema, COUNT, SEED))
+    for (Object expected : new RandomData(schema, COUNT, SEED, false))
       assertEquals(expected, reader.next());
     reader.close();
   }

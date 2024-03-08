@@ -92,8 +92,8 @@ public class TestDataFileConcat {
     System.out.println("COUNT = " + COUNT);
     for (int k = 0; k < 5; k++) {
       int syncInterval = 460 + k;
-      RandomData data1 = new RandomData(SCHEMA, COUNT, SEED);
-      RandomData data2 = new RandomData(SCHEMA, COUNT, SEED + 1);
+      RandomData data1 = new RandomData(SCHEMA, COUNT, SEED, false);
+      RandomData data2 = new RandomData(SCHEMA, COUNT, SEED + 1, false);
       File file1 = makeFile((codec == null ? "null" : codec.toString()) + "-A");
       File file2 = makeFile((codec2 == null ? "null" : codec2.toString()) + "-B");
       DataFileWriter<Object> writer = new DataFileWriter<>(new GenericDatumWriter<>()).setSyncInterval(syncInterval);

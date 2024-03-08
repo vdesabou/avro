@@ -91,7 +91,7 @@ public class TestCreateRandomFileTool {
     DataFileReader<Object> reader = new DataFileReader<>(OUT_FILE, new GenericDatumReader<>());
 
     Iterator<Object> found = reader.iterator();
-    for (Object expected : new RandomData(schemaParser.parse(SCHEMA_FILE), Integer.parseInt(COUNT), SEED))
+    for (Object expected : new RandomData(schemaParser.parse(SCHEMA_FILE), Integer.parseInt(COUNT), SEED, false))
       assertEquals(expected, found.next());
 
     reader.close();
@@ -131,7 +131,7 @@ public class TestCreateRandomFileTool {
     DataFileStream<Object> reader = new DataFileStream<>(new ByteArrayInputStream(file), new GenericDatumReader<>());
 
     Iterator<Object> found = reader.iterator();
-    for (Object expected : new RandomData(schemaParser.parse(SCHEMA_FILE), Integer.parseInt(COUNT), SEED))
+    for (Object expected : new RandomData(schemaParser.parse(SCHEMA_FILE), Integer.parseInt(COUNT), SEED, false))
       assertEquals(expected, found.next());
 
     reader.close();

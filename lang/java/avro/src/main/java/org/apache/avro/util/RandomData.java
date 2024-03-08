@@ -57,28 +57,30 @@ public class RandomData implements Iterable<Object> {
   private final long seed;
   private final int count;
   private final boolean utf8ForString;
+  private final boolean noNull;
   private final Faker faker = new Faker();
 
   private int intCounter = 0;
   private long longCounter = 0L;
 
-  public RandomData(Schema schema, int count) {
-    this(schema, count, false);
+  public RandomData(Schema schema, int count, boolean noNull) {
+    this(schema, count, false, noNull);
   }
 
-  public RandomData(Schema schema, int count, long seed) {
-    this(schema, count, seed, false);
+  public RandomData(Schema schema, int count, long seed, boolean noNull) {
+    this(schema, count, seed, false, noNull);
   }
 
-  public RandomData(Schema schema, int count, boolean utf8ForString) {
-    this(schema, count, System.currentTimeMillis(), utf8ForString);
+  public RandomData(Schema schema, int count, boolean utf8ForString, boolean noNull) {
+    this(schema, count, System.currentTimeMillis(), utf8ForString, noNull);
   }
 
-  public RandomData(Schema schema, int count, long seed, boolean utf8ForString) {
+  public RandomData(Schema schema, int count, long seed, boolean utf8ForString, boolean noNull) {
     this.root = schema;
     this.seed = seed;
     this.count = count;
     this.utf8ForString = utf8ForString;
+    this.noNull = noNull;
   }
 
   @Override
@@ -111,9 +113,20 @@ public class RandomData implements Iterable<Object> {
     case RECORD:
       GenericRecord record = new GenericData.Record(schema);
       for (Schema.Field field : schema.getFields()) {
-        Object value = (field.getObjectProp(USE_DEFAULT) == null) ? generate(field.schema(), random, d + 1)
-            : GenericData.get().getDefaultValue(field);
-        record.put(field.name(), value);
+          Object value = null;
+          boolean valueAssigned = false;
+          while (!valueAssigned) {
+              if (field.getObjectProp(USE_DEFAULT) != null) {
+                  value = GenericData.get().getDefaultValue(field);
+              } else {
+                  value = generate(field.schema(), random, d + 1);
+              }
+
+              if (value != null || !noNull) {
+                  valueAssigned = true;
+              }
+          }
+          record.put(field.name(), value);
       }
       return record;
     case ENUM:
@@ -276,7 +289,7 @@ public class RandomData implements Iterable<Object> {
       writer.setMeta("user_metadata", "someByteArray".getBytes(StandardCharsets.UTF_8));
       writer.create(sch, new File(args[1]));
 
-      for (Object datum : new RandomData(sch, Integer.parseInt(args[2]))) {
+      for (Object datum : new RandomData(sch, Integer.parseInt(args[2]), false)) {
         writer.append(datum);
       }
     }

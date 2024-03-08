@@ -68,7 +68,7 @@ public class GenerateBlockingData {
     Encoder vout = factory.directBinaryEncoder(out, null);
     vout.writeLong(numObjects); // metadata:the count of objects in the file
 
-    for (Object datum : new RandomData(sch, numObjects)) {
+    for (Object datum : new RandomData(sch, numObjects, false)) {
       dout.write(datum, bufOut);
       blockCount++;
       if (buffer.size() >= SYNC_INTERVAL) {

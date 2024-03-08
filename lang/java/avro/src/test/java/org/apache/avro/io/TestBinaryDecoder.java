@@ -191,7 +191,7 @@ public class TestBinaryDecoder {
     ByteArrayOutputStream baos = new ByteArrayOutputStream(8192);
     BinaryEncoder encoder = e_factory.binaryEncoder(baos, null);
 
-    for (Object datum : new RandomData(schema, count, seed)) {
+    for (Object datum : new RandomData(schema, count, seed, false)) {
       writer.write(datum, encoder);
       records.add(datum);
     }
